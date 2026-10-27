@@ -14,6 +14,9 @@ namespace FinShark.Models
         public Stock Stock { get; set; }
         [ForeignKey(nameof(StockId))]
         public int StockId { get; set; }
+        public AppUser? AppUser { get; set; }
+        [ForeignKey(nameof(AppUserId))]
+        public int AppUserId { get; set; }
 
     }
 }

@@ -1,7 +1,10 @@
 ﻿using FinShark.Data;
 using FinShark.Models;
+using FinShark.Models.Dtos;
+using FinShark.Models.Dtos.Mappers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinShark.Controllers
 {
@@ -17,18 +20,24 @@ namespace FinShark.Controllers
         }
         //URL/api/stock/GetAllStocks
         [HttpGet("GetAllStocks")]
-        public IActionResult GetAllStocks()
+        public async Task <IActionResult> GetAllStocks()
         {
             //SQL = SELECT * FROM Stocks
-            var stocks = _context.Stocks.ToList();
+            var stocks = await _context.Stocks.ToListAsync();
+            //List<StockDto> stockDtos = new List<StockDto>();
+            //foreach (var Stock in Stocks)
+            //{
+            //      s.ToStockDto() = StockMappers.ToStockDto(Stock)
+            //    stockDtos.Add(StockMappers.ToStockDto(Stock));
+            //}
             return Ok(stocks);
         }
         [HttpGet("GetStockById/{id}")]
-        public IActionResult GetStockById(int id)
+        public async Task <IActionResult> GetStockById(int id)
         {
             // SQL = SELECT * FROM Stocks WHERE Id = id 
             //Stock stock = _context.Stocks.Find(id);
-            var stock = _context.Stocks.FirstOrDefault(s => s.Id == id);
+            var stock = await _context.Stocks.FirstOrDefaultAsync(s => s.Id == id);
             if (stock == null)
             {
                 //return BadRequest("Bad Request");
@@ -38,14 +47,29 @@ namespace FinShark.Controllers
             return Ok(stock);
         }
         [HttpPost("AddNewStock")]
-        public IActionResult AddNewStock( Stock stock)
+        public async Task<IActionResult> AddNewStock( Stock stock)
         {
-            _context.Stocks.Add(stock);
-            _context.SaveChanges();
+            await _context.Stocks.AddAsync(stock);
+            await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetStockById), new { id = stock.Id }, stock);
         }
+
+
+        [HttpPost("CreateNewStock")]
+        public async Task<IActionResult> CreateNewStock([FromBody] StockRequestDto stockRequestDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            //await _context.Stocks.AddAsync(stock);
+            //await _context.SaveChangesAsync();
+            return Created();
+        }
+
+
         [HttpPut("UpdateStock/{id}")]
-        public IActionResult UpdateStock(int id, Stock NewStock)
+        public async Task <IActionResult> UpdateStock(int id, Stock NewStock)
         {
             //Stock OldStock = _context.Stocks.FirstOrDefault(s => s.Id == id);
             //if (OldStock == null)
@@ -61,15 +85,15 @@ namespace FinShark.Controllers
             //_context.SaveChanges();
             //return Ok(OldStock);
             _context.Stocks.Update(NewStock);
-            _context.SaveChanges();
+           await _context.SaveChangesAsync();
             return Ok(NewStock);
         }
         [HttpDelete("DeleteStock/{id}")]
-        public IActionResult DeleteStock(int id)
+        public async Task <IActionResult> DeleteStock(int id)
         {
-            Stock stock = _context.Stocks.Find(id);
+            Stock stock = await _context.Stocks.FindAsync(id);
             _context.Stocks.Remove(stock);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Ok($"Stock with ID {id} deleted successfully");
 
             //hard delete

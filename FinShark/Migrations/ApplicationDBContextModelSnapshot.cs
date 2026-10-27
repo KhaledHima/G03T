@@ -75,6 +75,9 @@ namespace FinShark.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -89,6 +92,8 @@ namespace FinShark.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppUserId");
+
                     b.HasIndex("StockId");
 
                     b.ToTable("Comments");
@@ -97,6 +102,7 @@ namespace FinShark.Migrations
                         new
                         {
                             Id = 1,
+                            AppUserId = 0,
                             Content = "Apple is a technology company.",
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StockId = 1,
@@ -105,6 +111,7 @@ namespace FinShark.Migrations
                         new
                         {
                             Id = 2,
+                            AppUserId = 0,
                             Content = "Microsoft provides cloud and software services.",
                             CreatedAt = new DateTime(2026, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StockId = 2,
@@ -113,6 +120,7 @@ namespace FinShark.Migrations
                         new
                         {
                             Id = 3,
+                            AppUserId = 0,
                             Content = "Alphabet is the parent company of Google.",
                             CreatedAt = new DateTime(2026, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             StockId = 3,
@@ -131,9 +139,22 @@ namespace FinShark.Migrations
                     b.Property<string>("CompanyName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("CostToCompany")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Industry")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InternalNotes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("LastDiv")
                         .HasColumnType("datetime2");
@@ -205,25 +226,14 @@ namespace FinShark.Migrations
 
             modelBuilder.Entity("FinShark.Models.Comment", b =>
                 {
-                    b.HasOne("FinShark.Models.Stock", "Stock")
-                        .WithMany("Comments")
-                        .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Stock");
-                });
-
-            modelBuilder.Entity("FinShark.Models.Wallet", b =>
-                {
                     b.HasOne("FinShark.Models.AppUser", "AppUser")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("FinShark.Models.Stock", "Stock")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("StockId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -233,9 +243,37 @@ namespace FinShark.Migrations
                     b.Navigation("Stock");
                 });
 
+            modelBuilder.Entity("FinShark.Models.Wallet", b =>
+                {
+                    b.HasOne("FinShark.Models.AppUser", "AppUser")
+                        .WithMany("Wallets")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinShark.Models.Stock", "Stock")
+                        .WithMany("Wallets")
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Stock");
+                });
+
+            modelBuilder.Entity("FinShark.Models.AppUser", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Wallets");
+                });
+
             modelBuilder.Entity("FinShark.Models.Stock", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Wallets");
                 });
 #pragma warning restore 612, 618
         }

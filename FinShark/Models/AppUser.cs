@@ -1,4 +1,6 @@
-﻿namespace FinShark.Models
+﻿using System.Collections.ObjectModel;
+
+namespace FinShark.Models
 {
     public class AppUser
     {
@@ -6,5 +8,7 @@
         public string? UserName { get; set; }
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
+        public Collection<Comment> Comments { get; set; }
+        public Collection<Wallet> Wallets { get; set; }
     }
 }
